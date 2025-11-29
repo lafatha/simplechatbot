@@ -1,51 +1,67 @@
-# Chatbot App
+## Tentang This Apps
 
-A modern chatbot application built with Next.js and powered by Google's Gemini AI.
+App ini adalah chatbot yang dapat berinteraksi dengan pengguna menggunakan teknologi kecerdasan buatan dari Google Gemini 2 Flash. Aplikasi dirancang dengan antarmuka yang bersih dan mudah digunakan, khusus untuk perangkat mobile.
 
-## Features
+## Fitur Utama
 
-- Clean, minimalist chat interface
-- Real-time AI responses using Gemini API
-- Responsive design matching Figma specifications
-- Indonesian language support
+- UI chat yang bersih dan minimalis
+- Respons AI real-time menggunakan Gemini 2 Flash
+- Menggunakan Figma MCP untuk design
+- Fitur tambah file untuk mengirim dokumen atau gambar
+- Dukungan bahasa Indonesia
 
-## Getting Started
+## Cara untuk run
 
-1. Install dependencies:
+1. Install next js karena diperlukan:
 ```bash
 npm install
 ```
 
-2. Run the development server:
+2. Jalankan server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+3. Buka browser dan akses [http://localhost:3000](http://localhost:3000)
 
-## Tech Stack
+## Teknologi yang Digunakan
 
-- **Next.js 14** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Google Gemini AI** - AI chatbot backend
+- **Next.js 14** - Framework React untuk membangun aplikasi web
+- **TypeScript** - Bahasa pemrograman untuk keamanan tipe data
+- **Tailwind CSS** - Framework CSS untuk styling
+- **Google Gemini 2 Flash** - Model AI untuk memproses dan merespons percakapan
+- **@google/genai** - Library untuk mengintegrasikan Gemini AI
 
-## Project Structure
+## Cara Menggunakan
+
+1. Ketik pesan Anda di kotak input di bagian bawah
+2. Klik tombol folder di kiri untuk menambahkan file (opsional)
+3. Klik tombol kirim di kanan untuk mengirim pesan
+4. Tunggu respons dari AI yang akan muncul di layar
+
+## Fitur Tambah File
+
+App ini mendukung pengiriman file melalui tombol folder di sebelah kiri kotak input. Setelah memilih file, nama dan ukuran file akan ditampilkan. File dapat dikirim bersama dengan pesan teks atau dikirim sendiri.
+
+## Struktur Project
 
 ```
 ├── app/
 │   ├── api/
 │   │   └── chat/
-│   │       └── route.ts    # API route for Gemini integration
-│   ├── globals.css         # Global styles
-│   ├── layout.tsx          # Root layout
-│   └── page.tsx            # Main chat page
+│   │       └── route.ts    # API route untuk integrasi Gemini
+│   ├── globals.css         # Style global
+│   ├── layout.tsx          # Layout utama
+│   └── page.tsx            # Halaman chat utama
 ├── components/
 │   ├── icons/
-│   │   ├── SendIcon.tsx    # Send icon component
-│   │   └── FolderIcon.tsx  # Folder/attachment icon
-│   ├── ChatMessage.tsx     # Chat message bubble component
-│   └── ChatInput.tsx       # Input field component
+│   │   ├── SendIcon.tsx    # Icon tombol kirim
+│   │   └── FolderIcon.tsx  # Icon tombol tambah file
+│   ├── ChatMessage.tsx     # Komponen bubble pesan
+│   └── ChatInput.tsx       # Komponen input dan tombol
 └── package.json
 ```
 
+## Catatan (baca yah)
+
+Pastikan kamu memiliki API key dari Google Gemini untuk menggunakan aplikasi ini. API key harus dikonfigurasi di file `app/api/chat/route.ts`.
