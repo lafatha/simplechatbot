@@ -17,12 +17,17 @@ App ini adalah chatbot yang dapat berinteraksi dengan pengguna menggunakan tekno
 npm install
 ```
 
-2. Jalankan server:
+2. Buat file `.env.local` di root project dan isi dengan API key Gemini:
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+3. Jalankan server:
 ```bash
 npm run dev
 ```
 
-3. Buka browser dan akses [http://localhost:3000](http://localhost:3000)
+4. Buka browser dan akses [http://localhost:3000](http://localhost:3000)
 
 ## Teknologi yang Digunakan
 
@@ -64,4 +69,4 @@ App ini mendukung pengiriman file melalui tombol folder di sebelah kiri kotak in
 
 ## Catatan (baca yah)
 
-Pastikan kamu memiliki API key dari Google Gemini untuk menggunakan aplikasi ini. API key harus dikonfigurasi di file `app/api/chat/route.ts`.
+Pastikan kamu memiliki API key dari Google Gemini untuk menggunakan aplikasi ini. API key harus dikonfigurasi di file `.env.local` dengan nama variable `GEMINI_API_KEY`. File `.env.local` tidak akan di-commit ke repository untuk keamanan.
