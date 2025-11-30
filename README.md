@@ -4,7 +4,7 @@ App ini adalah chatbot yang di beri nama Chatbot AI. Nah app ini web based dan d
 
 ## Fitur Utama
 
-- UI chat yang bersih dan minimalis dengan white theme
+- UI chat yang bersih dan minimalis 
 - Respons AI real-time menggunakan Gemini 2 Flash
 - Menggunakan Figma MCP untuk design
 - Fitur tambah file untuk mengirim dokumen atau gambar
