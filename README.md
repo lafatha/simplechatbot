@@ -1,6 +1,6 @@
-## Tentang This Apps
+## Tentang Apps ini 
 
-App ini adalah chatbot yang dapat berinteraksi dengan pengguna menggunakan teknologi kecerdasan buatan dari Google Gemini 2 Flash. Aplikasi dirancang dengan antarmuka yang bersih dan mudah digunakan, khusus untuk perangkat mobile.
+App ini adalah chatbot yang di beri nama Chatbot AI. Nah app ini web based dan dapat berinteraksi dengan pengguna menggunakan teknologi AI dari Google yaitu Gemini 2 Flash. Untuk user interface app ini di develop untuk mobile.
 
 ## Fitur Utama
 
