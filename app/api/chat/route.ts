@@ -50,6 +50,39 @@ export async function POST(request: NextRequest) {
 
     const genAI = new GoogleGenAI({ apiKey: API_KEY })
     
+    // System instruction untuk membuat AI lebih humanis dan menyebutkan identitas sebagai ChatBot AI
+    const systemInstruction = `Kamu adalah ChatBot AI yang ramah dan humanis. Identitasmu adalah sebagai ChatBot AI yang siap membantu pengguna dengan cara yang natural dan mudah dipahami.
+
+Panduan penting dalam merespons:
+1. Selalu ingat bahwa kamu adalah ChatBot AI yang membantu pengguna dengan ramah dan natural
+2. Gunakan bahasa yang natural dan mudah dipahami, seolah berbicara dengan teman
+3. JANGAN gunakan em dash (—) dalam respons, gunakan tanda hubung biasa (-) atau koma jika perlu
+4. JANGAN gunakan format bold atau tanda bintang (*) untuk penekanan apapun
+5. Gunakan bahasa yang hangat, empati, dan mudah dihubungi
+6. Jika perlu menyebutkan identitas, sebutkan dengan natural bahwa kamu adalah ChatBot AI
+7. Jawab pertanyaan dengan jelas dan membantu, tanpa terkesan kaku atau robotik
+8. Gunakan kalimat yang mengalir natural seperti percakapan sehari-hari
+9. Hindari penggunaan simbol khusus atau formatting yang tidak perlu`
+
+    // Function untuk membersihkan respons dari karakter yang tidak diizinkan
+    const cleanResponse = (text: string): string => {
+      let cleaned = text
+      
+      // Hapus em dash (—) dan ganti dengan tanda hubung biasa atau koma
+      cleaned = cleaned.replace(/—/g, '-')
+      cleaned = cleaned.replace(/–/g, '-')
+      
+      // Hapus tanda bintang untuk bold (*text* atau **text**)
+      cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1')
+      cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1')
+      
+      // Hapus underscore untuk italic (_text_ atau __text__)
+      cleaned = cleaned.replace(/__([^_]+)__/g, '$1')
+      cleaned = cleaned.replace(/_([^_]+)_/g, '$1')
+      
+      return cleaned.trim()
+    }
+
     let lastError: any = null
     
     // Try each model until one works
@@ -57,20 +90,26 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`Trying model: ${modelName}`)
         
+        // Prepare the prompt with system instruction
+        const fullPrompt = `${systemInstruction}\n\nUser: ${message}\n\nChatBot AI:`
+        
         const response = await genAI.models.generateContent({
           model: modelName,
-          contents: message,
+          contents: fullPrompt,
         })
         
         if (!response) {
           throw new Error('No response from model')
         }
         
-        const text = response.text
+        let text = response.text
 
         if (!text || text.trim() === '') {
           throw new Error('Empty response from model')
         }
+
+        // Clean the response to remove forbidden characters
+        text = cleanResponse(text)
 
         console.log(`Success with model: ${modelName}`)
         return NextResponse.json({ response: text })

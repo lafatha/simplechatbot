@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import SendIcon from './icons/SendIcon'
-import FolderIcon from './icons/FolderIcon'
 
 interface ChatInputProps {
   onSendMessage: (message: string, file?: File) => void
@@ -75,7 +73,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
         {selectedFile && (
           <div className="mb-2 px-3 py-2 bg-gray-50 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FolderIcon className="w-[12px] h-[12px] flex-shrink-0" />
+              <img src="/icons/folder.svg" alt="Folder" width={12} height={12} className="flex-shrink-0" />
               <span className="text-[11px] text-[#979c9e] truncate" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 {selectedFile.name}
               </span>
@@ -115,7 +113,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
             style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }}
             onClick={handleFileButtonClick}
           >
-            <FolderIcon className="w-[10px] h-[10px]" />
+            <img src="/icons/folder.svg" alt="Folder" width={10} height={10} />
           </button>
           {/* Send button - di dalam input field, kanan sesuai Figma */}
           <button
@@ -125,7 +123,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
             style={{ right: '12px', top: '50%', transform: 'translateY(-50%)' }}
             onClick={handleButtonClick}
           >
-            <SendIcon className="w-[10px] h-[10px]" />
+            <img src="/icons/send.svg" alt="Send" width={10} height={10} />
           </button>
         </form>
       </div>

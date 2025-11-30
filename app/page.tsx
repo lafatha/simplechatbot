@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ChatMessage from '@/components/ChatMessage'
 import ChatInput from '@/components/ChatInput'
+import Sidebar from '@/components/Sidebar'
 
 interface Message {
   id: string
@@ -13,6 +14,8 @@ interface Message {
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [recentChats, setRecentChats] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -22,6 +25,51 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Load recent chats from localStorage on mount
+  useEffect(() => {
+    const savedChats = localStorage.getItem('recentChats')
+    if (savedChats) {
+      try {
+        setRecentChats(JSON.parse(savedChats))
+      } catch (e) {
+        console.error('Error loading recent chats:', e)
+      }
+    }
+  }, [])
+
+  // Update recent chats when user sends a message
+  useEffect(() => {
+    const userMessages = messages.filter(m => m.isUser)
+    if (userMessages.length > 0) {
+      const chatTitles = userMessages
+        .map(m => {
+          // Extract first line or first 50 characters as title
+          const firstLine = m.text.split('\n')[0]
+          return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine
+        })
+        .filter((title, index, self) => self.indexOf(title) === index) // Remove duplicates
+        .slice(-10) // Keep only last 10
+      
+      setRecentChats(chatTitles)
+      localStorage.setItem('recentChats', JSON.stringify(chatTitles))
+    }
+  }, [messages])
+
+  const handleResetChat = () => {
+    if (confirm('Apakah Anda yakin ingin mereset percakapan?')) {
+      setMessages([])
+      setIsLoading(false)
+    }
+  }
+
+  const handleDashboard = () => {
+    setIsSidebarOpen(true)
+  }
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false)
+  }
 
   const handleSendMessage = async (messageText: string, file?: File) => {
     let displayText = messageText
@@ -100,9 +148,27 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen bg-white overflow-hidden flex justify-center">
+    <div className="h-screen bg-white overflow-hidden flex justify-center relative">
+      <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} recentChats={recentChats} />
       <div className="flex flex-col w-[390px] h-full relative">
-        <div className="flex-1 overflow-y-auto pb-32 pt-4">
+        {/* Top buttons - Dashboard (left) and Reset Chat (right) */}
+        <div className="absolute top-[25px] left-0 right-0 z-10">
+          <button
+            onClick={handleDashboard}
+            className="absolute left-[16px] w-[36px] h-[36px] rounded-[20px] border-[1.5px] border-[#979c9e] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
+            aria-label="Dashboard"
+          >
+            <img src="/icons/menu.svg" alt="Menu" width={20} height={20} />
+          </button>
+          <button
+            onClick={handleResetChat}
+            className="absolute right-[16px] w-[36px] h-[36px] rounded-[20px] border-[1.5px] border-[#979c9e] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
+            aria-label="Reset Chat"
+          >
+            <img src="/icons/rotate-left.svg" alt="Reset" width={20} height={20} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto pb-32 pt-20">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-[#979c9e] text-[12px] font-normal" style={{ fontFamily: "'DM Sans', sans-serif" }}>
