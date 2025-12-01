@@ -151,8 +151,8 @@ export default function Home() {
     <div className="min-h-screen flex justify-center relative">
       <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} recentChats={recentChats} />
       <div className="flex flex-col w-full max-w-[720px] md:max-w-[900px] min-h-screen relative px-4 md:px-8">
-        {/* Top buttons - Dashboard (left) and Reset Chat (right) */}
-        <div className="absolute top-[25px] left-8 right-8 z-10 flex justify-between">
+        {/* Top navbar - terkunci di atas (sticky) */}
+        <div className="sticky top-0 z-10 flex justify-between pt-[25px] pb-3 bg-white px-4">
           <button
             onClick={handleDashboard}
             className="w-[36px] h-[36px] rounded-[20px] border-[1.5px] border-[#979c9e] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
@@ -168,7 +168,7 @@ export default function Home() {
             <img src="/icons/rotate-left.svg" alt="Reset" width={20} height={20} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto pt-20 pb-4">
+        <div className="flex-1 overflow-y-auto pb-4">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-[#979c9e] text-[12px] font-normal" style={{ fontFamily: "'DM Sans', sans-serif" }}>
