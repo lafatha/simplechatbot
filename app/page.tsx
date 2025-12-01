@@ -81,12 +81,10 @@ export default function Home() {
       .map((m) => `${m.isUser ? 'User' : 'ChatBot AI'}: ${m.text}`)
       .join('\n')
 
-    // Jika ada file, tambahkan info file ke pesan tanpa menyebut nama file
+    // Jika ada file, JANGAN tampilkan info file di bubble chat (hanya gambar preview)
     if (file) {
       const isImage = file.type.startsWith('image/')
-      const fileLabel = isImage ? '📎 Gambar dilampirkan' : '📎 File dilampirkan'
-      displayText = messageText ? `${messageText}\n${fileLabel}` : fileLabel
-
+      
       // Jika file adalah gambar, buat preview kecil
       if (isImage) {
         imageUrl = URL.createObjectURL(file)
