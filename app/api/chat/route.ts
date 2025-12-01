@@ -13,24 +13,43 @@ export async function POST(request: NextRequest) {
     const contentType = request.headers.get('content-type') || ''
     let message = ''
     let file: File | null = null
+    let history = ''
+    let imagePart: { inlineData: { data: string; mimeType: string } } | null = null
 
     if (contentType.includes('multipart/form-data')) {
       // Handle file upload
       const formData = await request.formData()
       message = (formData.get('message') as string) || ''
+      history = (formData.get('history') as string) || ''
       const fileData = formData.get('file') as File | null
       
       if (fileData) {
         file = fileData
-        // For now, we'll just include file info in the message
-        // In a real app, you might want to process the file (e.g., extract text, convert to base64, etc.)
-        const fileInfo = `User mengirim file: ${file.name} (${(file.size / 1024).toFixed(1)} KB, tipe: ${file.type})`
+        // Jangan kirim nama file ke model, hanya info umum
+        const isImage = file.type.startsWith('image/')
+
+        if (isImage) {
+          // Siapkan bagian gambar untuk dikirim ke Gemini sebagai inlineData (vision)
+          const arrayBuffer = await file.arrayBuffer()
+          const base64Data = Buffer.from(arrayBuffer).toString('base64')
+          imagePart = {
+            inlineData: {
+              data: base64Data,
+              mimeType: file.type,
+            },
+          }
+        }
+
+        const fileInfo = isImage
+          ? 'User juga melampirkan sebuah gambar. Tolong analisis isi gambar tersebut dan jawab pertanyaan user, tanpa menyebut nama file.'
+          : 'User juga melampirkan sebuah file. Gunakan informasi ini jika relevan, tanpa menyebut nama file.'
         message = message ? `${message}\n\n${fileInfo}` : fileInfo
       }
     } else {
       // Handle JSON request
       const body = await request.json()
       message = body.message || ''
+      history = body.history || ''
     }
 
     if (!message && !file) {
@@ -90,12 +109,32 @@ Panduan penting dalam merespons:
       try {
         console.log(`Trying model: ${modelName}`)
         
-        // Prepare the prompt with system instruction
-        const fullPrompt = `${systemInstruction}\n\nUser: ${message}\n\nChatBot AI:`
-        
+        // Siapkan prompt dengan system instruction + history percakapan per sesi
+        const historyBlock = history
+          ? `Riwayat percakapan sejauh ini (ingatlah konteks ini saat menjawab):\n${history}\n\n`
+          : ''
+
+        const fullPrompt = `${systemInstruction}\n\n${historyBlock}User: ${message}\n\nChatBot AI:`
+
+        // Jika ada gambar, kirim sebagai input multimodal
+        let contents: any
+        if (imagePart) {
+          contents = [
+            {
+              role: 'user',
+              parts: [
+                { text: fullPrompt },
+                imagePart,
+              ],
+            },
+          ]
+        } else {
+          contents = fullPrompt
+        }
+
         const response = await genAI.models.generateContent({
           model: modelName,
-          contents: fullPrompt,
+          contents,
         })
         
         if (!response) {

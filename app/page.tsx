@@ -75,14 +75,20 @@ export default function Home() {
   const handleSendMessage = async (messageText: string, file?: File) => {
     let displayText = messageText
     let imageUrl: string | undefined
-    
-    // Jika ada file, tambahkan info file ke pesan
+
+    // Buat history percakapan untuk dikirim ke server (memory per sesi)
+    const history = messages
+      .map((m) => `${m.isUser ? 'User' : 'ChatBot AI'}: ${m.text}`)
+      .join('\n')
+
+    // Jika ada file, tambahkan info file ke pesan tanpa menyebut nama file
     if (file) {
-      const fileInfo = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
-      displayText = messageText ? `${messageText}\n${fileInfo}` : fileInfo
+      const isImage = file.type.startsWith('image/')
+      const fileLabel = isImage ? '📎 Gambar dilampirkan' : '📎 File dilampirkan'
+      displayText = messageText ? `${messageText}\n${fileLabel}` : fileLabel
 
       // Jika file adalah gambar, buat preview kecil
-      if (file.type.startsWith('image/')) {
+      if (isImage) {
         imageUrl = URL.createObjectURL(file)
       }
     }
@@ -105,12 +111,13 @@ export default function Home() {
       if (file) {
         const formData = new FormData()
         formData.append('message', messageText || '')
+        formData.append('history', history)
         formData.append('file', file)
-        
+
         body = formData
-        headers = {} // Don't set Content-Type, browser will set it with boundary
+        headers = {} // Don't set Content-Type, browser akan set dengan boundary
       } else {
-        body = JSON.stringify({ message: messageText })
+        body = JSON.stringify({ message: messageText, history })
         headers = {
           'Content-Type': 'application/json',
         }
