@@ -59,7 +59,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
 
   return (
     <div
-      className="bg-white"
+      className="bg-transparent"
       style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
     >
       <div className="relative" style={{ paddingLeft: '16px', paddingRight: '16px' }}>

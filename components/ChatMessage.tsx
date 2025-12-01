@@ -1,9 +1,10 @@
 interface ChatMessageProps {
   message: string
   isUser: boolean
+  imageUrl?: string
 }
 
-export default function ChatMessage({ message, isUser }: ChatMessageProps) {
+export default function ChatMessage({ message, isUser, imageUrl }: ChatMessageProps) {
   return (
     <div
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
@@ -17,6 +18,15 @@ export default function ChatMessage({ message, isUser }: ChatMessageProps) {
         }`}
       >
         <p className="text-sm text-gray-800 break-words leading-relaxed">{message}</p>
+        {imageUrl && (
+          <div className="mt-2">
+            <img
+              src={imageUrl}
+              alt="Preview file"
+              className="max-h-32 w-auto rounded-md object-cover"
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ interface Message {
   id: string
   text: string
   isUser: boolean
+  imageUrl?: string
 }
 
 export default function Home() {
@@ -73,17 +74,24 @@ export default function Home() {
 
   const handleSendMessage = async (messageText: string, file?: File) => {
     let displayText = messageText
+    let imageUrl: string | undefined
     
     // Jika ada file, tambahkan info file ke pesan
     if (file) {
       const fileInfo = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
       displayText = messageText ? `${messageText}\n${fileInfo}` : fileInfo
+
+      // Jika file adalah gambar, buat preview kecil
+      if (file.type.startsWith('image/')) {
+        imageUrl = URL.createObjectURL(file)
+      }
     }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       text: displayText,
       isUser: true,
+      imageUrl,
     }
 
     setMessages((prev) => [...prev, userMessage])
@@ -168,7 +176,7 @@ export default function Home() {
             <img src="/icons/rotate-left.svg" alt="Reset" width={20} height={20} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto pb-4">
+        <div className="flex-1 overflow-y-auto pb-24 md:pb-28">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-[#979c9e] text-[12px] font-normal" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -182,6 +190,7 @@ export default function Home() {
                   key={message.id}
                   message={message.text}
                   isUser={message.isUser}
+                  imageUrl={message.imageUrl}
                 />
               ))}
               {isLoading && (
@@ -199,8 +208,13 @@ export default function Home() {
             </div>
           )}
         </div>
-        <div className="mt-auto">
-          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        {/* Bottom navbar-style chat input: selalu terlihat, naik saat keyboard muncul */}
+        <div className="fixed inset-x-0 bottom-0">
+          <div className="flex justify-center bg-transparent">
+            <div className="w-full max-w-[720px] md:max-w-[900px] px-4 md:px-8 bg-transparent">
+              <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
