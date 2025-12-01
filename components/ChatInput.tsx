@@ -58,7 +58,10 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
   }
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 bg-white" style={{ paddingBottom: '16px' }}>
+    <div
+      className="bg-white"
+      style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+    >
       <div className="relative" style={{ paddingLeft: '16px', paddingRight: '16px' }}>
         {/* Hidden file input */}
         <input
@@ -98,7 +101,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tanya sesuatu......."
-            className="w-full h-[81px] rounded-[18px] border-[1.5px] border-[#979c9e] text-[12px] text-[#979c9e] font-normal focus:outline-none"
+            className="w-full h-[81px] rounded-[18px] border-[1.5px] border-[#979c9e] text-[16px] md:text-[14px] text-[#979c9e] font-normal focus:outline-none"
             style={{ 
               fontFamily: "'DM Sans', sans-serif",
               paddingLeft: '52px',

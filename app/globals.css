@@ -28,11 +28,4 @@ body {
   }
 }
 
-/* Prevent responsive scaling - mobile only */
-@media (min-width: 390px) {
-  body {
-    display: flex;
-    justify-content: center;
-  }
-}
-
+/* (Hapus aturan yang membuat body selalu centering/width kecil supaya layout bisa full width di desktop) */
