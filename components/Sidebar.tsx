@@ -1,12 +1,43 @@
 'use client'
 
+import { useState, useMemo, useEffect } from 'react'
+
+interface ChatTopic {
+  id: string
+  title: string
+  messages: any[]
+  createdAt: number
+}
+
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
-  recentChats?: string[]
+  recentChats?: ChatTopic[]
+  onNewChat?: () => void
+  onLoadTopic?: (topicId: string) => void
+  onDeleteTopic?: (topicId: string) => void
 }
 
-export default function Sidebar({ isOpen, onClose, recentChats = [] }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, recentChats = [], onNewChat, onLoadTopic, onDeleteTopic }: SidebarProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Reset search query when sidebar closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('')
+    }
+  }, [isOpen])
+
+  // Filter recent chats based on search query
+  const filteredRecentChats = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return recentChats
+    }
+    const query = searchQuery.toLowerCase().trim()
+    return recentChats.filter(topic => 
+      topic.title.toLowerCase().includes(query)
+    )
+  }, [recentChats, searchQuery])
 
   return (
     <>
@@ -27,10 +58,7 @@ export default function Sidebar({ isOpen, onClose, recentChats = [] }: SidebarPr
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-gray-900 text-lg font-semibold" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                Menu
-              </h2>
+            <div className="flex items-center justify-end mb-4">
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-900 transition-colors"
@@ -47,6 +75,8 @@ export default function Sidebar({ isOpen, onClose, recentChats = [] }: SidebarPr
               <input
                 type="text"
                 placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-50 text-gray-900 text-sm px-4 py-2 pl-10 rounded-lg border border-gray-200 focus:outline-none focus:border-gray-300"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               />
@@ -56,13 +86,27 @@ export default function Sidebar({ isOpen, onClose, recentChats = [] }: SidebarPr
                   <path d="M21 21L16.65 16.65" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Navigation Menu */}
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-1 mb-6">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-left">
+              <button 
+                onClick={onClose}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-left"
+              >
                 <div className="w-6 h-6 rounded-full bg-white border border-gray-300 flex items-center justify-center">
                   <span className="text-black text-xs font-bold">C</span>
                 </div>
@@ -77,26 +121,67 @@ export default function Sidebar({ isOpen, onClose, recentChats = [] }: SidebarPr
                   Library
                 </span>
               </button>
+
+              <button 
+                onClick={onNewChat}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V19M5 12H19" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-gray-700 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                  New Chat
+                </span>
+              </button>
             </div>
 
             {/* Recent Chats */}
-            {recentChats.length > 0 && (
+            {filteredRecentChats.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-xs font-semibold uppercase mb-2 px-3" style={{ fontFamily: "'DM Sans', sans-serif", color: '#000000', fontWeight: 600 }}>
                   Recent
                 </h3>
                 <div className="space-y-1">
-                  {recentChats.slice(0, 10).map((chat, index) => (
-                    <button
-                      key={index}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  {filteredRecentChats.slice(0, 10).map((topic) => (
+                    <div
+                      key={topic.id}
+                      className="group relative w-full px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      <p className="text-gray-700 text-sm truncate" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                        {chat}
-                      </p>
-                    </button>
+                      <button
+                        onClick={() => onLoadTopic && onLoadTopic(topic.id)}
+                        className="w-full text-left pr-8"
+                      >
+                        <p className="text-gray-700 text-sm truncate" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                          {topic.title}
+                        </p>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (onDeleteTopic) {
+                            onDeleteTopic(topic.id)
+                          }
+                        }}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                        aria-label="Delete chat"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 6H5H21" stroke="#666666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#666666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M10 11V17" stroke="#666666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M14 11V17" stroke="#666666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
                   ))}
                 </div>
+              </div>
+            )}
+            {searchQuery && filteredRecentChats.length === 0 && recentChats.length > 0 && (
+              <div className="mb-6 px-3">
+                <p className="text-gray-500 text-sm text-center" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                  No results found
+                </p>
               </div>
             )}
           </div>

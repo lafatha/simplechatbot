@@ -12,11 +12,19 @@ interface Message {
   imageUrl?: string
 }
 
+interface ChatTopic {
+  id: string
+  title: string
+  messages: Message[]
+  createdAt: number
+}
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [recentChats, setRecentChats] = useState<string[]>([])
+  const [recentChats, setRecentChats] = useState<ChatTopic[]>([])
+  const [currentTopicId, setCurrentTopicId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -27,40 +35,124 @@ export default function Home() {
     scrollToBottom()
   }, [messages])
 
-  // Load recent chats from localStorage on mount
+  // Load recent topics from localStorage on mount
   useEffect(() => {
-    const savedChats = localStorage.getItem('recentChats')
-    if (savedChats) {
+    const savedTopics = localStorage.getItem('chatTopics')
+    if (savedTopics) {
       try {
-        setRecentChats(JSON.parse(savedChats))
+        const topics: ChatTopic[] = JSON.parse(savedTopics)
+        setRecentChats(topics)
       } catch (e) {
-        console.error('Error loading recent chats:', e)
+        console.error('Error loading chat topics:', e)
       }
     }
   }, [])
 
-  // Update recent chats when user sends a message
+  // Save current topic when messages change
   useEffect(() => {
-    const userMessages = messages.filter(m => m.isUser)
-    if (userMessages.length > 0) {
-      const chatTitles = userMessages
-        .map(m => {
-          // Extract first line or first 50 characters as title
-          const firstLine = m.text.split('\n')[0]
-          return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine
+    if (messages.length > 0 && currentTopicId) {
+      const userMessages = messages.filter(m => m.isUser)
+      if (userMessages.length > 0) {
+        // Get title from first user message
+        const firstMessage = userMessages[0].text
+        const title = firstMessage.split('\n')[0]
+        const finalTitle = title.length > 50 ? title.substring(0, 50) + '...' : title
+
+        // Update or create topic using functional update
+        setRecentChats(prevTopics => {
+          const updatedTopics = [...prevTopics]
+          const topicIndex = updatedTopics.findIndex(t => t.id === currentTopicId)
+          
+          const topic: ChatTopic = {
+            id: currentTopicId,
+            title: finalTitle,
+            messages: messages,
+            createdAt: topicIndex >= 0 ? updatedTopics[topicIndex].createdAt : Date.now()
+          }
+
+          if (topicIndex >= 0) {
+            updatedTopics[topicIndex] = topic
+          } else {
+            updatedTopics.unshift(topic)
+          }
+
+          // Keep only last 20 topics
+          const sortedTopics = updatedTopics.sort((a, b) => b.createdAt - a.createdAt).slice(0, 20)
+          localStorage.setItem('chatTopics', JSON.stringify(sortedTopics))
+          return sortedTopics
         })
-        .filter((title, index, self) => self.indexOf(title) === index) // Remove duplicates
-        .slice(-10) // Keep only last 10
-      
-      setRecentChats(chatTitles)
-      localStorage.setItem('recentChats', JSON.stringify(chatTitles))
+      }
     }
-  }, [messages])
+  }, [messages, currentTopicId])
 
   const handleResetChat = () => {
     if (confirm('Apakah Anda yakin ingin mereset percakapan?')) {
       setMessages([])
       setIsLoading(false)
+      setCurrentTopicId(null)
+    }
+  }
+
+  const handleNewChat = () => {
+    // Save current topic before creating new one
+    if (messages.length > 0 && currentTopicId) {
+      const userMessages = messages.filter(m => m.isUser)
+      if (userMessages.length > 0) {
+        const firstMessage = userMessages[0].text
+        const title = firstMessage.split('\n')[0]
+        const finalTitle = title.length > 50 ? title.substring(0, 50) + '...' : title
+
+        const updatedTopics = [...recentChats]
+        const topicIndex = updatedTopics.findIndex(t => t.id === currentTopicId)
+        
+        const topic: ChatTopic = {
+          id: currentTopicId,
+          title: finalTitle,
+          messages: messages,
+          createdAt: topicIndex >= 0 ? updatedTopics[topicIndex].createdAt : Date.now()
+        }
+
+        if (topicIndex >= 0) {
+          updatedTopics[topicIndex] = topic
+        } else {
+          updatedTopics.unshift(topic)
+        }
+
+        const sortedTopics = updatedTopics.sort((a, b) => b.createdAt - a.createdAt).slice(0, 20)
+        setRecentChats(sortedTopics)
+        localStorage.setItem('chatTopics', JSON.stringify(sortedTopics))
+      }
+    }
+
+    // Create new topic
+    const newTopicId = `topic-${Date.now()}`
+    setCurrentTopicId(newTopicId)
+    setMessages([])
+    setIsLoading(false)
+    setIsSidebarOpen(false)
+  }
+
+  const handleLoadTopic = (topicId: string) => {
+    const topic = recentChats.find(t => t.id === topicId)
+    if (topic) {
+      setCurrentTopicId(topic.id)
+      setMessages(topic.messages)
+      setIsSidebarOpen(false)
+    }
+  }
+
+  const handleDeleteTopic = (topicId: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus topik ini?')) {
+      // Remove topic from state
+      const updatedTopics = recentChats.filter(t => t.id !== topicId)
+      setRecentChats(updatedTopics)
+      localStorage.setItem('chatTopics', JSON.stringify(updatedTopics))
+
+      // If deleted topic is current topic, clear messages
+      if (currentTopicId === topicId) {
+        setMessages([])
+        setCurrentTopicId(null)
+      }
     }
   }
 
@@ -89,6 +181,12 @@ export default function Home() {
       if (isImage) {
         imageUrl = URL.createObjectURL(file)
       }
+    }
+
+    // Create topic ID if not exists
+    if (!currentTopicId) {
+      const newTopicId = `topic-${Date.now()}`
+      setCurrentTopicId(newTopicId)
     }
 
     const userMessage: Message = {
@@ -162,20 +260,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex justify-center relative">
-      <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} recentChats={recentChats} />
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={handleCloseSidebar} 
+        recentChats={recentChats}
+        onNewChat={handleNewChat}
+        onLoadTopic={handleLoadTopic}
+        onDeleteTopic={handleDeleteTopic}
+      />
       <div className="flex flex-col w-full max-w-[720px] md:max-w-[900px] min-h-screen relative px-4 md:px-8">
         {/* Top navbar - terkunci di atas (sticky) */}
         <div className="sticky top-0 z-10 flex justify-between pt-[25px] pb-3 bg-white px-4">
           <button
             onClick={handleDashboard}
-            className="w-[36px] h-[36px] rounded-[20px] border-[1.5px] border-[#979c9e] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
+            className="w-[36px] h-[36px] flex items-center justify-center bg-transparent border-none cursor-pointer"
             aria-label="Dashboard"
           >
             <img src="/icons/menu.svg" alt="Menu" width={20} height={20} />
           </button>
           <button
             onClick={handleResetChat}
-            className="w-[36px] h-[36px] rounded-[20px] border-[1.5px] border-[#979c9e] flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
+            className="w-[36px] h-[36px] flex items-center justify-center bg-transparent border-none cursor-pointer"
             aria-label="Reset Chat"
           >
             <img src="/icons/rotate-left.svg" alt="Reset" width={20} height={20} />
