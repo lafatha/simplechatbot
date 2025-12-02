@@ -10,10 +10,13 @@ App ini adalah chatbot yang di beri nama Chatbot AI. Nah app ini web based dan d
 - Fitur tambah file untuk mengirim dokumen atau gambar
 - Dukungan bahasa Indonesia
 - Dashboard menu sidebar dengan animasi slide dari kanan
-- Reset chat functionality untuk memulai percakapan baru
-- Recent chats yang tersimpan otomatis di localStorage
+- **Sistem chat berbasis topik** - Chat dikelompokkan per topik, bukan per message
+- **New Chat** - Tombol untuk membuat topik chat baru sambil menyimpan topik sebelumnya
+- **Search Recent Chats** - Fitur pencarian untuk mencari topik di Recent Chats
+- **Delete Topic** - Tombol delete (tong sampah) pada setiap topik yang muncul saat hover
+- Reset chat functionality untuk mereset percakapan dalam topik saat ini
+- Recent chats yang tersimpan otomatis di localStorage (maksimal 20 topik)
 - RAG (Retrieval Augmented Generation) dengan system instruction untuk respons yang lebih humanis
-- Icon SVG yang diambil langsung dari desain Figma
 
 ## Cara untuk run
 
@@ -45,12 +48,24 @@ npm run dev
 ## Cara Menggunakan
 
 1. Klik tombol menu (ikon hamburger) di kiri atas untuk membuka dashboard sidebar
-2. Klik tombol reset (ikon rotate-left) di kanan atas untuk mereset percakapan
+2. Klik tombol reset (ikon rotate-left) di kanan atas untuk mereset percakapan dalam topik saat ini
 3. Ketik pesan Anda di kotak input di bagian bawah
 4. Klik tombol folder di kiri input untuk menambahkan file (opsional)
 5. Klik tombol kirim di kanan input untuk mengirim pesan
 6. Tunggu respons dari ChatBot AI yang akan muncul di layar
-7. Recent chats akan otomatis tersimpan dan muncul di sidebar menu
+7. Topik chat akan otomatis tersimpan dan muncul di sidebar menu
+
+### Membuat Topik Chat Baru
+
+- Klik tombol **"New Chat"** di sidebar untuk membuat topik chat baru
+- Topik sebelumnya akan otomatis tersimpan dengan judul dari pesan pertama
+- Chat area akan dikosongkan untuk memulai percakapan baru
+
+### Mengelola Topik Chat
+
+- **Membuka topik**: Klik pada topik di daftar Recent Chats untuk memuat kembali percakapan
+- **Mencari topik**: Gunakan search bar di sidebar untuk mencari topik berdasarkan judul
+- **Menghapus topik**: Arahkan kursor ke topik di Recent Chats, lalu klik tombol tong sampah yang muncul di kanan
 
 ## Fitur Tambah File
 
@@ -62,15 +77,42 @@ Dashboard menu dapat dibuka dengan mengklik tombol menu di kiri atas. Menu sideb
 
 - **ChatBot** - Menu utama untuk kembali ke chat
 - **Library** - Menu untuk melihat library
-- **Recent Chats** - Daftar percakapan terbaru yang otomatis tersimpan
-- **Search Bar** - Untuk mencari dalam menu
+- **New Chat** - Tombol untuk membuat topik chat baru
+- **Search Bar** - Untuk mencari topik di Recent Chats (fungsional dengan filter real-time)
+- **Recent Chats** - Daftar topik chat terbaru yang otomatis tersimpan (maksimal 20 topik)
 - **User Profile** - Informasi profil pengguna di bagian bawah
 
-Recent chats akan otomatis tersimpan di localStorage dan muncul berdasarkan pesan yang dikirim oleh user.
+### Fitur Recent Chats
+
+- **Penyimpanan per topik**: Setiap topik menyimpan semua pesan dalam percakapan tersebut
+- **Judul otomatis**: Judul topik diambil dari pesan pertama user (maksimal 50 karakter)
+- **Search functionality**: Gunakan search bar untuk mencari topik berdasarkan judul (case-insensitive)
+- **Delete topic**: Hover pada topik untuk melihat tombol delete (tong sampah) di kanan
+- **Auto-save**: Topik otomatis tersimpan saat user mengirim pesan
+- **Penyimpanan lokal**: Semua topik disimpan di localStorage dengan key `chatTopics`
+
+## Sistem Chat Berbasis Topik
+
+Aplikasi menggunakan sistem chat berbasis topik di mana setiap percakapan dikelompokkan dalam topik terpisah:
+
+- **Struktur Topik**: Setiap topik memiliki ID unik, judul (dari pesan pertama), array pesan, dan timestamp
+- **Penyimpanan**: Maksimal 20 topik terbaru disimpan di localStorage
+- **Auto-save**: Topik otomatis tersimpan saat user mengirim pesan pertama atau mengupdate percakapan
+- **Switching Topik**: User dapat beralih antar topik dengan mengklik topik di Recent Chats
+- **Isolasi Data**: Setiap topik memiliki history chat sendiri yang terpisah
+
+### Manfaat Sistem Topik
+
+- Organisasi chat yang lebih baik
+- Kemudahan mengelola multiple percakapan
+- History chat yang terstruktur
+- Kemudahan mencari topik tertentu
 
 ## Reset Chat
 
-Tombol reset chat di kanan atas memungkinkan pengguna untuk mereset percakapan saat ini. Akan muncul konfirmasi sebelum mereset untuk mencegah kehilangan data secara tidak sengaja.
+Tombol reset chat di kanan atas memungkinkan pengguna untuk mereset percakapan dalam topik saat ini. Akan muncul konfirmasi sebelum mereset untuk mencegah kehilangan data secara tidak sengaja. Topik tetap tersimpan di Recent Chats meskipun percakapan di-reset.
+
+**Catatan**: Reset chat hanya mengosongkan percakapan dalam topik saat ini, bukan menghapus topik dari Recent Chats.
 
 ## RAG Implementation
 
@@ -102,7 +144,7 @@ Semua icon dalam aplikasi diambil langsung dari desain Figma dan disimpan sebaga
 │   │       └── route.ts    # API route untuk integrasi Gemini dengan RAG
 │   ├── globals.css         # Style global
 │   ├── layout.tsx          # Layout utama dengan favicon
-│   └── page.tsx            # Halaman chat utama dengan dashboard dan reset
+│   └── page.tsx            # Halaman chat utama dengan sistem topik, dashboard dan reset
 ├── components/
 │   ├── icons/              # Icon components (legacy, sekarang menggunakan SVG)
 │   │   ├── SendIcon.tsx
@@ -111,7 +153,7 @@ Semua icon dalam aplikasi diambil langsung dari desain Figma dan disimpan sebaga
 │   │   └── RotateLeftIcon.tsx
 │   ├── ChatMessage.tsx     # Komponen bubble pesan
 │   ├── ChatInput.tsx       # Komponen input dan tombol
-│   └── Sidebar.tsx         # Komponen sidebar dashboard menu
+│   └── Sidebar.tsx         # Komponen sidebar dashboard menu dengan search dan delete topic
 ├── public/
 │   ├── icons/              # Icon SVG dari Figma
 │   │   ├── menu.svg
