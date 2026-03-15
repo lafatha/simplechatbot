@@ -10,10 +10,10 @@ App ini adalah chatbot yang di beri nama Chatbot AI. Nah app ini web based dan d
 - Fitur tambah file untuk mengirim dokumen atau gambar
 - Dukungan bahasa Indonesia
 - Dashboard menu sidebar dengan animasi slide dari kanan
-- **Sistem chat berbasis topik** - Chat dikelompokkan per topik, bukan per message
-- **New Chat** - Tombol untuk membuat topik chat baru sambil menyimpan topik sebelumnya
-- **Search Recent Chats** - Fitur pencarian untuk mencari topik di Recent Chats
-- **Delete Topic** - Tombol delete (tong sampah) pada setiap topik yang muncul saat hover
+- Sistem chat berbasis topik - Chat dikelompokkan per topik, bukan per message
+- New Chat** - Tombol untuk membuat topik chat baru sambil menyimpan topik sebelumnya
+- Search Recent Chats - Fitur pencarian untuk mencari topik di Recent Chats
+- Delete Topic - Tombol delete (tong sampah) pada setiap topik yang muncul saat hover
 - Reset chat functionality untuk mereset percakapan dalam topik saat ini
 - Recent chats yang tersimpan otomatis di localStorage (maksimal 20 topik)
 - RAG (Retrieval Augmented Generation) dengan system instruction untuk respons yang lebih humanis
